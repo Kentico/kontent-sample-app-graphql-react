@@ -1,5 +1,6 @@
 const pageSize = 3;
 const authorQueryStringKey = "author";
+const languageQueryStringKey = "lang";
 const personaQueryStringKey = "persona";
 const pageQueryStringKey = "page";
 
@@ -31,6 +32,10 @@ export const getListingPaginationAndFilter = (location) => {
 export const setAuthor = (location, author) => setParameter(location, authorQueryStringKey, author);
 
 export const getAuthor = (location) => getParameter(location, authorQueryStringKey);
+
+export const setLanguage = (location, language) => setParameter(location, languageQueryStringKey, language);
+
+export const getLanguage = (location) => getParameter(location, languageQueryStringKey);
 
 export const setPersona = (location, persona) => setParameter(location, personaQueryStringKey, persona);
 

@@ -1,12 +1,19 @@
 import get from "lodash.get";
 import { Button } from "@material-ui/core";
 import { Link, Icon } from ".";
+import { useLocation } from 'react-router-dom';
 
 function Action(props) {
-  const { action } = props;
+  const search = useLocation().search;
+
+  const getHrefFromUrlSlugAndPreserveQueryString = (navigationItem) => {
+    return `${get(navigationItem, "slug")}${search}`
+  }
+
+  const { action, size } = props;
   const navigationItem = get(action, "navigationItem", null);
   const href = navigationItem._system_.type.codename === "external_url" ?
-               get(navigationItem, "url") : get(navigationItem, "slug");
+               get(navigationItem, "url") : getHrefFromUrlSlugAndPreserveQueryString(navigationItem);
   const action_options = get(action, "options.items", []);
 
 
@@ -38,7 +45,7 @@ function Action(props) {
       startIcon={iconPosition && iconPosition === "left" && <Icon icon={icon} />}
       endIcon={iconPosition && iconPosition === "right" && <Icon icon={icon} />}
       underline="none"
-      size={props.size}
+      size={size}
       href={href}
       {...config}
       {...options}>

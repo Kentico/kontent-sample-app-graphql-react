@@ -4,6 +4,7 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import { Action, Image, Link, SideDrawer } from ".";
 import { Container, Hidden } from "@material-ui/core";
+import LanguageSelector from './LanguageSelector';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -47,6 +48,7 @@ function Header({ asset, title, mainMenuActions }) {
               <div className={classes.mainMenu}>
                 {mainMenuActions.map((navigationItem, index) =>
                     <Action key={index} action={navigationItem} />)}
+                <LanguageSelector/>
               </div>
             </Hidden>
             <Hidden mdUp>

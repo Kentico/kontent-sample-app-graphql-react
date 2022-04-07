@@ -2,6 +2,7 @@ import { Drawer, IconButton, List, ListItem } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useState } from "react";
 import { Action, Icon } from ".";
+import LanguageSelector from './LanguageSelector';
 
 const useStyles = makeStyles({
   list: {
@@ -42,6 +43,9 @@ const SideDrawer = (props) => {
             <Action action={navigationItem} />
           </ListItem>
         ))}
+        <ListItem key="language" >
+          <LanguageSelector/>
+        </ListItem>
       </List>
     </div>
   );

@@ -8,6 +8,9 @@ import React, { useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import { richTextFields, seoFields } from "./graphQLFragments";
 import getSeo from "./utils/getSeo";
+import { useLocation } from 'react-router-dom';
+import { getLanguage } from './utils/queryString';
+import { languages } from './components/LanguageSelector';
 
 const useStyles = makeStyles((theme) => ({
   sections: {
@@ -129,8 +132,8 @@ function LandingPage(props) {
   `;
 
   const landingPageQuery = gql`
-    query LandingPageQuery($codename: String!) {
-      landingPage(codename: $codename) {
+    query LandingPageQuery($codename: String!, $language: String!) {
+      landingPage(codename: $codename, languageFilter: {languageCodename: $language}) {
         ...LandingPageFields
       }
     }
@@ -138,8 +141,8 @@ function LandingPage(props) {
   `;
 
   const navigationAndLandingPageQuery = gql`
-    query NavigationAndLandingPageQuery($codename: String!) {
-      navigationItem(codename: $codename) {
+    query NavigationAndLandingPageQuery($codename: String!, $language: String!) {
+      navigationItem(codename: $codename, languageFilter: {languageCodename: $language}) {
         _seo {
           ...SeoFields
         }
@@ -158,11 +161,12 @@ function LandingPage(props) {
 
   const [sectionItems, setSectionItems] = useState(null);
   const [seo, setSeo] = useState({});
+    const language = getLanguage(useLocation()) || languages[0].codename;
 
   const { loading, error } = useQuery(
     props.seo ? landingPageQuery : navigationAndLandingPageQuery,
     {
-      variables: { codename: props.codename },
+      variables: { codename: props.codename, language: language},
       onCompleted: (data) => {
         if (props.seo) {
           setSectionItems(data.landingPage.sections.items);

@@ -1,7 +1,6 @@
-import { Router, Switch, Route } from "react-router-dom";
+import { Router, Switch, Route, useLocation } from "react-router-dom";
 import React, { useState } from "react";
 import ReactGA from 'react-ga';
-import { createBrowserHistory } from 'history';
 import { gql, useQuery } from "@apollo/client";
 import get from "lodash.get";
 import Post from "./Post";
@@ -18,11 +17,12 @@ import {
 } from "./graphQLFragments";
 import GraphQLLoader from "./components/GraphQLLoader";
 import getSeo from "./utils/getSeo";
-import { getListingPaginationAndFilter } from "./utils/queryString";
+import { getLanguage, getListingPaginationAndFilter } from "./utils/queryString";
+import { languages } from './components/LanguageSelector';
 
-export default function App(props) {
+export default function App() {
   const homePageQuery = gql`
-    query HomePageQuery($codename: String!) {
+    query HomePageQuery($codename: String!, $language: String!) {
       post_All {
         items {
           slug
@@ -36,7 +36,7 @@ export default function App(props) {
           }
         }
       }
-      homepage(codename: $codename) {
+      homepage(codename: $codename, languageFilter: {languageCodename: $language}) {
         content {
           ... on LandingPage {
             _system_ {
@@ -193,15 +193,23 @@ export default function App(props) {
     };
   };
 
-  const { loading, error } = useQuery(homePageQuery, {
-    variables: { codename: homepageCodename },
-    onCompleted: (data) => {
+  const language = getLanguage(useLocation()) || languages[0].codename;
+
+  const { loading, error, fetchMore } = useQuery(homePageQuery, {
+    variables: { codename: homepageCodename, language: language },
+    onCompleted: async (data) => {
       const mappings = getMappings(data);
       const siteConfiguration = getSiteConfiguration(data);
 
-      setMappings(mappings);
       setSiteConfiguration(siteConfiguration);
       setHomepageSeo(getSeo(data.homepage._seo));
+
+      await fetchMore({
+        variables: { codename: homepageCodename, language: languages.find(lang => lang.codename !== language).codename},
+        updateQuery: (_, fetchMoreResult) => {
+          setMappings({...getMappings(fetchMoreResult.fetchMoreResult), ...mappings});
+        }
+      });
     },
   });
 
@@ -213,20 +221,10 @@ export default function App(props) {
     return <GraphQLLoader error={error} loading={loading} />;
   }
 
-  const history = createBrowserHistory();
-  if (props.initializeAnalytics) {
-    history.listen(location => {
-      ReactGA.set({ page: location.pathname });
-      ReactGA.pageview(location.pathname);
-    });
-  }
-
   return (
-    <Router history={history} basename={process.env.PUBLIC_URL}>
-      <Switch>
-        <Route path="/" render={renderPage} />
-      </Switch>
-    </Router>
+    <Switch>
+      <Route path="/" render={renderPage} />
+    </Switch>
   );
 
   function renderPage({ location }) {
